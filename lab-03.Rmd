@@ -34,24 +34,28 @@ Are there missing values?
 
 ```{r}
 # explore the types of the columns in jan_feb_flights
-
+view(jan_feb_flights)
 ```
 
 ```{r}
 # which columns are integer
-
+jan_feb_flights |> 
+  select(where(is.integer))
 
 # which columns are double
-
+jan_feb_flights |> 
+  select(where(is.double))
 
 # which columns are character
-
+jan_feb_flights |> 
+  select(where(is.character))
 
 ```
 
 ```{r}
 # which columns contain NA's
-
+jan_feb_flights |> 
+  select(where(~ any(is.na(.x))))
 ```
 
 **Summary:**  
@@ -64,7 +68,7 @@ Did the GenAI explanation (if used) help you? Which language model you explored?
 What was clear or unclear? Did it make any errors or skip anything important? Did you fact-check? Did you need to provide follow-up prompts or clarifications, or was the first response sufficient?
 
 _Your answer here_
-
+We used Claude which helped us understand how to navigate the function.
 ---
 
 # 2. Delays & Weather
@@ -73,17 +77,23 @@ _Your answer here_
 
 ## 2.1 Code
 
-```{r eval=FALSE} 
+```{r eval=TRUE} 
 ## REMEMBER TO SET eval=TRUE
 
 # join the datasets
 jan_feb_flights <- jan_feb_flights %>%
-  ____________(weather, by = c(______________________)) 
+  right_join(weather, by = c("origin", "year", "month", "day", "hour")) 
 ```
 
 ```{r}
 # is there a difference in wind speed when wind_gust is missing vs not missing?
+jan_feb_flights |> 
+  filter(!is.na(wind_gust))|> 
+  summarise(wind_speed_average_with_gust = mean(wind_speed))
 
+jan_feb_flights |> 
+  filter(is.na(wind_gust)) |> 
+  summarise(wind_speed_average_without = mean(wind_speed,na.rm=TRUE))
 
 
 ```
@@ -92,18 +102,20 @@ Describe the difference in wind speed when wind_gust is missing vs not missing:
 
 _Your answer here_
 
-```{r eval=FALSE} 
+```{r eval=TRUE} 
 ## REMEMBER TO SET eval=TRUE
 
 # create a new variable, gust_present
 jan_feb_flights <- jan_feb_flights %>%
-  mutate(gust_present = _______________)
+  mutate(gust_present = !is.na(wind_gust))
 ```
 
 
 ```{r}
 # is there a relationship between gust_present and dep_delay?
-
+jan_feb_flights |> 
+  group_by(gust_present) |> 
+  summarise(avg_dep_delay = mean(dep_delay,na.rm=TRUE),sd_dep_delay = sd(dep_delay,na.rm=TRUE))
 
 ```
 
